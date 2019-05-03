@@ -17,11 +17,12 @@ class NumericParser implements ParserInterface
     public function parse($expression)
     {
         $expression = trim($expression);
-        
+
         if (!preg_match('/^[0-9]*(\.[0-9]*){0,1}$/', $expression)) {
-            throw new ParserException($expression);
+            return null;
+            // throw new ParserException($expression);
         }
-        
+
         return $infos = [
             'type' => 'numeric',
             'value' => floatval($expression),

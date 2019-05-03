@@ -17,11 +17,12 @@ class VariableParser implements ParserInterface
     public function parse($expression)
     {
         $expression = trim($expression);
-        
+
         if (!preg_match('/^([a-zA-Z_]+[0-9\.]*)+$/', $expression)) {
-            throw new ParserException($expression);
+            return null;
+            //throw new ParserException($expression);
         }
-        
+
         return [
             'type' => 'variable',
             'name' => $expression,

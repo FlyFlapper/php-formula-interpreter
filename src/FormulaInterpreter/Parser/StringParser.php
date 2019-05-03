@@ -19,16 +19,17 @@ class StringParser implements ParserInterface
     public function parse($expression)
     {
         $expression = trim($expression);
-        
+
         if (!preg_match(self::PATTERN, $expression)) {
-            throw new ParserException($expression);
+            return null;
+            //throw new ParserException($expression);
         }
 
         $string = substr($expression, 1, strlen($expression) - 2);
         $string = str_replace("\\\"", "\"", $string);
         return $infos = [
             'type' => 'string',
-            'value' => (string) $string,
+            'value' => (string)$string,
         ];
     }
 }

@@ -6,6 +6,7 @@
  */
 
 namespace FormulaInterpreter\Parser;
+
 use FormulaInterpreter\Command\OperationCommand;
 
 /**
@@ -15,17 +16,17 @@ use FormulaInterpreter\Command\OperationCommand;
  */
 class OperatorParser implements ParserInterface
 {
-    
+
     /**
      * @var ParserInterface
      */
     protected $operandParser;
-    
+
     public function __construct(ParserInterface $operandParser)
     {
         $this->operandParser = $operandParser;
     }
-    
+
     public function parse($expression)
     {
         $expression = trim($expression);
@@ -53,7 +54,7 @@ class OperatorParser implements ParserInterface
         }
         return false;
     }
-    
+
     public function hasOperator($expression, $operator)
     {
         $parenthesis = 0;
@@ -65,10 +66,10 @@ class OperatorParser implements ParserInterface
             }
             switch ($expression[$i]) {
                 case '(':
-                    $parenthesis ++;
+                    $parenthesis++;
                     break;
                 case ')':
-                    $parenthesis --;
+                    $parenthesis--;
                     break;
                 case '"':
                     $quotes = $quotes > 0 ? 0 : 1;
@@ -77,14 +78,14 @@ class OperatorParser implements ParserInterface
         }
         return false;
     }
-    
+
     public function searchOperands($expression, $operators)
     {
         $operands = [];
         $exprLen = strlen($expression);
 
         $parenthesis = 0;
-        
+
         $previous = 0;
         $quotes = 0;
         $lastOperator = null;
@@ -120,9 +121,9 @@ class OperatorParser implements ParserInterface
 
         $subExpression = substr($expression, $previous, strlen($expression) - $previous);
         $operands[] = $this->createOperand($subExpression, $lastOperator);
-        
+
         $firstOperand = array_shift($operands);
-        
+
         return [
             'type' => 'operation',
             'firstOperand' => $firstOperand['value'],
@@ -130,7 +131,8 @@ class OperatorParser implements ParserInterface
         ];
     }
 
-    public static function catchOperatorFromPosition($expression, $position, $operators){
+    public static function catchOperatorFromPosition($expression, $position, $operators)
+    {
         usort($operators, function ($a, $b) {
             return strlen($a) < strlen($b);
         });
@@ -162,14 +164,14 @@ class OperatorParser implements ParserInterface
         ];
         return $map[$operator] ?? null;
     }
-    
+
     public function createOperand($value, $operator = null)
     {
         $operand = [];
         $operand['operator'] = self::getOperatorConstant($operator);
-        
+
         $value = trim($value);
-        
+
         if ($value != '') {
             $value = self::cleanEnclosingParentheses($value);
         }
@@ -178,12 +180,17 @@ class OperatorParser implements ParserInterface
             throw new ParserException($value);
         }
 
-        
-        $operand['value'] = $this->operandParser->parse($value);
+        $value = $this->operandParser->parse($value);
+        if ($value == null) {
+            //No parsers found
+            throw new ParserException($value);
+        }
+        $operand['value'] = $value;
         return $operand;
     }
 
-    private static function cleanEnclosingParentheses($expression) {
+    private static function cleanEnclosingParentheses($expression)
+    {
         $lastChar = substr($expression, -1, 1);
         if ($expression[0] == '(' && $lastChar == ')') {
             $expression = substr($expression, 1, -1);
